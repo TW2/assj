@@ -25,5 +25,5 @@ Images contains transparency and some events if any!
 
 You can play with the demo program by launching the Assj.java main class. A fake ASS is used in memory.
 
-The demo:
+The demo with the use of 'Essai' font:
 <img src="https://github.com/TW2/assj/blob/master/screenshots/Capture%20assj%20001.png" />
