@@ -18,6 +18,8 @@ package org.wingate.assj;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -891,4 +893,58 @@ public class AssStyle {
         return style;
     }
     
+    public List<String> getTagsFromStyle(){
+        List<String> tags = new ArrayList<>();
+        
+        // Fontname
+        tags.add("\\fn" + getFontname());
+        // Fontsize
+        tags.add("\\fs" + getFontsize());
+        // TextColor
+        tags.add("\\1c&H" + getTextColorHex(false) + "&");
+        tags.add("\\1a&H" + getTextAlphaHex() + "&");
+        // KaraColor
+        tags.add("\\2c&H" + getKaraokeColorHex(false) + "&");
+        tags.add("\\2a&H" + getKaraokeAlphaHex() + "&");
+        // OutlineColor
+        tags.add("\\3c&H" + getBordColorHex(false) + "&");
+        tags.add("\\3a&H" + getBordAlphaHex() + "&");
+        // ShadowColor
+        tags.add("\\4c&H" + getShadColorHex(false) + "&");
+        tags.add("\\4a&H" + getShadAlphaHex() + "&");
+        // Bold
+        tags.add("\\b" + (isBold() ? "1" : "0"));
+        // Italic
+        tags.add("\\i" + (isItalic() ? "1" : "0"));
+        // Underline
+        tags.add("\\u" + (isUnderline() ? "1" : "0"));
+        // Strikeout
+        tags.add("\\s" + (isStrikeout() ? "1" : "0"));
+        // Scale X
+        tags.add("\\fscx" + getScaleX());
+        // Scale Y
+        tags.add("\\fcsy" + getScaleY());
+        // Spacing
+        tags.add("\\fsp" + getSpacing());
+        // Angle (Z axis)
+        tags.add("\\frz" + getAngle());
+        // BorderStyle (non-ASS, custom to work with methods)
+        tags.add("\\bs" + getBorderStyle());
+        // Outline
+        tags.add("\\bord" + getOutline());
+        // Shadow
+        tags.add("\\shad" + getShadow());
+        // Alignment
+        tags.add("\\an" + getAlignment());
+        // MarginL (non-ASS, custom to work with methods)
+        tags.add("\\ml" + getMarginL());
+        // MarginR (non-ASS, custom to work with methods)
+        tags.add("\\mr" + getMarginR());
+        // MarginV (non-ASS, custom to work with methods)
+        tags.add("\\mv" + getMarginV());
+        // Encoding (maybe the most suck thing in 2022)
+        tags.add("\\fe" + getEncoding());
+            
+        return tags;
+    }
 }

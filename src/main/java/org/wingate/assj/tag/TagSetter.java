@@ -139,27 +139,27 @@ public class TagSetter {
 
                         // Inner tags
                         case "bord" -> {
-                            neo.setData(Float.parseFloat(m.group("param")));
+                            neo.setData(Double.parseDouble(m.group("param")));
                             tas.add(neo);
                         }
                         case "xbord" -> {
-                            neo.setData(Float.parseFloat(m.group("param")));
+                            neo.setData(Double.parseDouble(m.group("param")));
                             tas.add(neo);
                         }
                         case "ybord" -> {
-                            neo.setData(Float.parseFloat(m.group("param")));
+                            neo.setData(Double.parseDouble(m.group("param")));
                             tas.add(neo);
                         }
                         case "shad" -> {
-                            neo.setData(Float.parseFloat(m.group("param")));
+                            neo.setData(Double.parseDouble(m.group("param")));
                             tas.add(neo);
                         }
                         case "xshad" -> {
-                            neo.setData(Float.parseFloat(m.group("param")));
+                            neo.setData(Double.parseDouble(m.group("param")));
                             tas.add(neo);
                         }
                         case "yshad" -> {
-                            neo.setData(Float.parseFloat(m.group("param")));
+                            neo.setData(Double.parseDouble(m.group("param")));
                             tas.add(neo);
                         }
                         case "be" -> {

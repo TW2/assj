@@ -7,6 +7,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.wingate.assj.ASS;
 import org.wingate.assj.AssEvent;
 import org.wingate.assj.AssStyle;
@@ -20,6 +21,7 @@ import org.wingate.assj.lib.BooleanOp;
 public class TagParameters {
     
     private final ASS ass;
+    private final ImageGenerator igen;
     
     private int videoWidth;
     private int videoHeight;
@@ -62,6 +64,8 @@ public class TagParameters {
 
     public TagParameters(ASS ass) {
         this.ass = ass;
+        
+        igen = new ImageGenerator();
         
         videoWidth = Integer.parseInt(ass.getResX());
         videoHeight = Integer.parseInt(ass.getResY());
@@ -114,10 +118,45 @@ public class TagParameters {
         drawingOffset = 0;
     }
     
-    public List<BufferedImage> doFromASS(AssEvent evt, long nanos){
+    public List<BufferedImage> getImages(long nanos){
+        return getImages(nanos, 0L, 0L);
+    }
+    
+    public List<BufferedImage> getImages(long nanos, long startlimit, long stoplimit){
+        // Liste à retourner
+        List<BufferedImage> images = new ArrayList<>();
+        
+        // On traite tous les événements
+        for(AssEvent ev : ass.getEvents()){
+            long start = TimeUnit.MILLISECONDS.toNanos(AssTime.toMillisecondsTime(ev.getStartTime()));
+            long end = TimeUnit.MILLISECONDS.toNanos(AssTime.toMillisecondsTime(ev.getEndTime()));
+            if(startlimit != 0L || stoplimit != 0L){
+                if(startlimit <= nanos && nanos < stoplimit){
+                    images.addAll(doFromASS(ev, nanos));
+                }
+            }else if(start <= nanos && nanos < end){
+                images.addAll(doFromASS(ev, nanos));
+            }
+        }
+        
+        // TODO prendre en charge les couches
+        
+        return images;
+    }
+    
+    private List<BufferedImage> doFromASS(AssEvent evt, long nanos){
         TagLettersWith tlw = TagLettersWith.create(evt);
         
         for(TagLetter tl : tlw.getListWords()){
+            
+            // On obtient les tags dans le style
+            if(tl.getTags().isEmpty()){
+                tl.getTags().addAll(evt.getStyle().getTagsFromStyle());
+            }else{
+                tl.getTags().addAll(0, evt.getStyle().getTagsFromStyle());
+            }            
+            
+            // On obtient les tags dans la phrase
             List<TagAbstract> tas = TagSetter.getTags(tl);
         
             for(TagAbstract ta : tas){
@@ -180,7 +219,8 @@ public class TagParameters {
                 }
             }
         }
-        return null;
+        
+        return igen.render(this, nanos);
     }
     
     public void apply(AlignmentLegacy a){
