@@ -14,7 +14,7 @@ public class Assj {
         // Launch sample
         FlatLightLaf.setup();
         SampleFrame sf = new SampleFrame();
-        sf.setSize(1300, 800);
+        sf.setSize(1920, 1200);
         sf.setLocationRelativeTo(null);
         sf.setVisible(true);
     }

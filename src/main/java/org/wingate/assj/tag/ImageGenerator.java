@@ -30,6 +30,7 @@ import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.Scene;
+import javafx.scene.SceneAntialiasing;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.StrokeType;
@@ -77,8 +78,6 @@ public class ImageGenerator extends JFXPanel {
             TagLettersWith tlw = TagLettersWith.create(ev);
             int count = 0;
             for(TagLetter tl : tlw.getListWords()){
-                System.out.println(tl);
-
                 // String
                 String str = tl.getSentence();
 
@@ -177,7 +176,7 @@ public class ImageGenerator extends JFXPanel {
                 count++;
             }
 
-            Scene scene = new Scene(root, p.getVideoWidth(), p.getVideoHeight(), true);
+            Scene scene = new Scene(root, p.getVideoWidth(), p.getVideoHeight(), true, SceneAntialiasing.BALANCED);
             scene.setFill(Color.TRANSPARENT);
 
             boolean fixedEyeAtCameraZero = false;
@@ -241,15 +240,16 @@ public class ImageGenerator extends JFXPanel {
         
         TagLettersWith tlw = TagLettersWith.create(event);
         
-        for(TagLetter tl : tlw.getListWords()){ 
-            Text t = new Text(tl.getSentence());
+        for(TagLetter tl : tlw.getListWords()){
+            s = tl.getSentence();
+            Text t = new Text(s);
             t.setFont(font);
             double widthLine = t.getBoundsInLocal().getWidth();
             double heightLine;
             double videoWidth = p.getVideoWidth();
             double videoHeight = p.getVideoHeight();
 
-            if(widthLine > videoWidth - event.getMarginL() - event.getMarginR()){
+            if(widthLine >= videoWidth - (double)event.getMarginL() - (double)event.getMarginR()){
                 switch(p.getWrapStyle()){
                     case 0 -> {
                         int indexOfNextSpace = tl.getSentence().indexOf(" ", (int)(Math.round(widthLine / 2d)));
