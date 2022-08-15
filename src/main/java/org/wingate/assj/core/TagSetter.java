@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.wingate.assj.tag;
+package org.wingate.assj.core;
 
 import java.awt.Color;
 import java.awt.Shape;
@@ -27,6 +27,11 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.wingate.assj.AssTime;
+import org.wingate.assj.tag.AnimationAssistant;
+import org.wingate.assj.tag.Coordinates;
+import org.wingate.assj.tag.FadingComplexAssistant;
+import org.wingate.assj.tag.FadingNormalAssistant;
+import org.wingate.assj.tag.MovementAssistant;
 
 /**
  *

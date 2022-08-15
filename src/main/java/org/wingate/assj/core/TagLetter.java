@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 util2
+ * Copyright (C) 2022 util2
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,42 +14,46 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.wingate.assj.tag;
+package org.wingate.assj.core;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
  * @author util2
- * @param <T>
  */
-public abstract class TagAbstract<T> implements TagInterface {
+public class TagLetter {
     
-    protected String name = "Unknown tag";
-    protected TagEnum type = TagEnum.Unknown;
-    protected String tag = "";
-    protected T data;
+    private String sentence;
+    private List<String> tags = new ArrayList<>();
 
-    public TagAbstract() {
+    public TagLetter() {
     }
 
-    @Override
-    public String getName() {
-        return name;
+    public TagLetter(String sentence) {
+        this.sentence = sentence;
+    }
+    
+    public TagLetter(String sentence, List<String> tags) {
+        this.sentence = sentence;
+        this.tags = tags;
     }
 
-    @Override
-    public String getTag() {
-        return tag;
+    public String getSentence() {
+        return sentence;
     }
 
-    public T getData() {
-        return data;
+    public void setSentence(String sentence) {
+        this.sentence = sentence;
     }
 
-    public void setData(T data) {
-        this.data = data;
+    public List<String> getTags() {
+        return tags;
     }
 
-    public TagEnum getType() {
-        return type;
+    public void setTags(List<String> tags) {
+        this.tags = tags;
     }
+    
 }

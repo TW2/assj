@@ -5,6 +5,8 @@
  */
 package org.wingate.assj.tag;
 
+import org.wingate.assj.core.TagEnum;
+import org.wingate.assj.core.TagAbstract;
 import java.awt.Shape; // Shape as Rectangle2D
 
 /**

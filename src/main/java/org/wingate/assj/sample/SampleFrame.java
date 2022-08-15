@@ -28,7 +28,7 @@ import org.wingate.assj.ASS;
 import org.wingate.assj.AssEvent;
 import org.wingate.assj.AssStyle;
 import org.wingate.assj.AssTime;
-import org.wingate.assj.tag.TagParameters;
+import org.wingate.assj.core.TagParameters;
 
 /**
  *

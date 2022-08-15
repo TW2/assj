@@ -14,10 +14,63 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.wingate.assj.tag;
+package org.wingate.assj.core;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.wingate.assj.tag.AlignmentLegacy;
+import org.wingate.assj.tag.AlignmentNumpad;
+import org.wingate.assj.tag.AlphaGeneral;
+import org.wingate.assj.tag.AlphaOfKaraoke;
+import org.wingate.assj.tag.AlphaOfOutline;
+import org.wingate.assj.tag.AlphaOfShadow;
+import org.wingate.assj.tag.AlphaOfText;
+import org.wingate.assj.tag.Animation;
+import org.wingate.assj.tag.Blur;
+import org.wingate.assj.tag.BlurEdge;
+import org.wingate.assj.tag.Bold;
+import org.wingate.assj.tag.BordLegacy;
+import org.wingate.assj.tag.BordX;
+import org.wingate.assj.tag.BordY;
+import org.wingate.assj.tag.ClipDrawing;
+import org.wingate.assj.tag.ClipDrawingInvisibility;
+import org.wingate.assj.tag.ClipRectangle;
+import org.wingate.assj.tag.ClipRectangleInvisibility;
+import org.wingate.assj.tag.ColorOfKaraoke;
+import org.wingate.assj.tag.ColorOfOutline;
+import org.wingate.assj.tag.ColorOfShadow;
+import org.wingate.assj.tag.ColorOfText;
+import org.wingate.assj.tag.ColorOfTextLegacy;
+import org.wingate.assj.tag.Drawing;
+import org.wingate.assj.tag.DrawingBaselineOffset;
+import org.wingate.assj.tag.FadingComplex;
+import org.wingate.assj.tag.FadingNormal;
+import org.wingate.assj.tag.FontEncoding;
+import org.wingate.assj.tag.FontName;
+import org.wingate.assj.tag.FontRotate;
+import org.wingate.assj.tag.FontRotateX;
+import org.wingate.assj.tag.FontRotateY;
+import org.wingate.assj.tag.FontRotateZ;
+import org.wingate.assj.tag.FontScale;
+import org.wingate.assj.tag.FontScaleX;
+import org.wingate.assj.tag.FontScaleY;
+import org.wingate.assj.tag.FontSize;
+import org.wingate.assj.tag.FontSpacing;
+import org.wingate.assj.tag.Italic;
+import org.wingate.assj.tag.KaraokeFill;
+import org.wingate.assj.tag.KaraokeFillLegacy;
+import org.wingate.assj.tag.KaraokeNormal;
+import org.wingate.assj.tag.KaraokeOutline;
+import org.wingate.assj.tag.Movement;
+import org.wingate.assj.tag.Origin;
+import org.wingate.assj.tag.Position;
+import org.wingate.assj.tag.Reset;
+import org.wingate.assj.tag.ShadLegacy;
+import org.wingate.assj.tag.ShadX;
+import org.wingate.assj.tag.ShadY;
+import org.wingate.assj.tag.Strikeout;
+import org.wingate.assj.tag.Underline;
+import org.wingate.assj.tag.WrapStyle;
 
 /**
  *

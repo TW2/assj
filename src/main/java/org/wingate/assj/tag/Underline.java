@@ -16,6 +16,9 @@
  */
 package org.wingate.assj.tag;
 
+import org.wingate.assj.core.TagEnum;
+import org.wingate.assj.core.TagAbstract;
+
 /**
  *
  * @author util2

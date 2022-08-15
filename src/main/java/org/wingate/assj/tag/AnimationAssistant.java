@@ -5,6 +5,7 @@
  */
 package org.wingate.assj.tag;
 
+import org.wingate.assj.core.TagAbstract;
 import java.util.ArrayList;
 import java.util.List;
 import org.wingate.assj.AssTime;
