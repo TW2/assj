@@ -79,8 +79,8 @@ public class Assj {
                             Logger.getLogger(Assj.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     });
-                }catch(NumberFormatException exc){
-                    
+                }catch(NumberFormatException ex){
+                    Logger.getLogger(Assj.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 long elapsed = System.currentTimeMillis() - before;
                 System.out.println(String.format(
