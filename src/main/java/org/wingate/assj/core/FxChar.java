@@ -1,17 +1,39 @@
+/*
+ * Copyright (C) 2022 util2
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.wingate.assj.core;
 
-import org.wingate.assj.core.ImageGenerator;
 import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics2D;
 import java.awt.Shape;
+import java.awt.font.TextLayout;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import javafx.scene.shape.CubicCurveTo;
+import javafx.scene.shape.LineTo;
+import javafx.scene.shape.MoveTo;
+import javafx.scene.shape.Path;
+import javafx.scene.shape.QuadCurveTo;
 import org.wingate.assj.ASS;
 import org.wingate.assj.AssEvent;
-import org.wingate.assj.AssStyle;
 import org.wingate.assj.AssTime;
 import org.wingate.assj.lib.BooleanOp;
 import org.wingate.assj.tag.AlignmentLegacy;
@@ -74,17 +96,33 @@ import org.wingate.assj.tag.WrapStyle;
  *
  * @author util2
  */
-public class TagParameters {
+public class FxChar {
     
+    private final char character;
+    private final String tags;
+    private final long nanos;
     private final ASS ass;
-    private final ImageGenerator igen;
+    private final AssEvent event;
+    private final Path path;
     
+    /*
+    SWING
+    */
+    private Font font;
+    private double strWitdh = -1d;
+    private double strHeight = -1d;
+    private boolean space = false;
+    private double spaceWidth = -1d;
+    
+    /*--------------------------------------------------------------------------
+    PARAMETERS FOR ONE CHAR
+    --------------------------------------------------------------------------*/
     private int videoWidth;
     private int videoHeight;
     
     private long karaokeLastMs;
     
-    private final List<Animation> transforms; // Par défaut pas d'animation
+    private List<Animation> transforms; // Par défaut pas d'animation
     private GeneralPath visibility;
     private int alignment; // Par défaut >> 2
     private float textAlpha; // Par défaut >> opaque (00)
@@ -101,183 +139,178 @@ public class TagParameters {
     private boolean italic;
     private boolean underline;
     private boolean strikeout;
-    private final double[] bord;
-    private final double[] shad;
+    private final double[] bord = new double[2];
+    private final double[] shad = new double[2];
     private String fontName;
     private float fontSize;
     private int fontEncoding;
-    private final float[] fontRotate;
-    private final float[] fontScale;
+    private final float[] fontRotate = new float[3];
+    private final float[] fontScale = new float[2];
     private float fontSpacing;
-    private final double[] shear;
+    private final double[] shear = new double[2];
     private int wrapStyle;
-    private AssStyle reset;
-    private final double[] move; // Et position
-    private final double[] origin;
+    private String reset;
+    private final double[] move = new double[6]; // Et position
+    private final double[] origin = new double[2];
     private Shape drawing;
     private int drawingOffset; // pbo
+    //==========================================================================
     
-
-    public TagParameters(ASS ass) {
+    public FxChar(char c, String tags, long nanos, ASS ass, AssEvent ev, Font font,
+            double lineWidth, double lineHeight, double spaceWidth){
+        this.character = c; 
+        this.tags = tags;
+        this.nanos = nanos;
         this.ass = ass;
+        this.event = ev;
+        this.font = font;
         
-        igen = new ImageGenerator();
+        strWitdh = lineWidth;
+        strHeight = lineHeight;
+        
+        if(Character.isSpaceChar(c) == true){
+            space = true;
+            this.spaceWidth = spaceWidth;
+        }
         
         videoWidth = Integer.parseInt(ass.getResX());
         videoHeight = Integer.parseInt(ass.getResY());
         
-        karaokeLastMs = 0L;
-        
-        transforms = new ArrayList<>();
-        
-        visibility = new GeneralPath(new Rectangle2D.Double(0, 0, videoWidth, videoHeight));
-        
-        alignment = 2;
-        
-        textAlpha = 1f;
-        karaAlpha = 1f;
-        bordAlpha = 1f;
-        shadAlpha = 1f;
-        
-        textColor = Color.white;
-        karaColor = Color.yellow;
-        bordColor = Color.black;
-        shadColor = Color.black;
-        
-        blur = 0f;
-        blurEdge = 0f;
-        
-        bold = false;
-        italic = false;
-        underline = false;
-        strikeout = false;
-        
-        bord = new double[]{2d, 2d};
-        shad = new double[]{2d, 2d};
-        
-        fontName = "Arial";
-        fontSize = 18f;
-        fontEncoding = 1;
-        fontRotate = new float[]{0f, 0f, 0f};
-        fontScale = new float[]{1f, 1f};
-        fontSpacing = 0f;        
-        shear = new double[]{0d, 0d};
-        
-        wrapStyle = 2;
-        
-        reset = null;
-        
-        move = new double[]{0d, 0d, 0d, 0d, 0d, 0d};
-        origin = new double[]{0d, 0d};
-        
-        drawing = null;
-        drawingOffset = 0;
+        path = createPath();
     }
     
-    public List<BufferedImage> getImages(long nanos){
-        return getImages(nanos, 0L, 0L);
-    }
-    
-    public List<BufferedImage> getImages(long nanos, long startlimit, long stoplimit){
-        // Liste à retourner
-        List<BufferedImage> images = new ArrayList<>();
+    private Path createPath(){
+        // On veut un objet Path en JavaFx pour notre valeur de retour
+        Path p = new Path();
         
-        // On traite tous les événements
-        for(AssEvent ev : ass.getEvents()){
-            long start = TimeUnit.MILLISECONDS.toNanos(AssTime.toMillisecondsTime(ev.getStartTime()));
-            long end = TimeUnit.MILLISECONDS.toNanos(AssTime.toMillisecondsTime(ev.getEndTime()));
-            if(startlimit != 0L || stoplimit != 0L){
-                if(startlimit <= nanos && nanos < stoplimit){
-                    images.addAll(doFromASS(ev, nanos));
-                }
-            }else if(start <= nanos && nanos < end){
-                images.addAll(doFromASS(ev, nanos));
+        // On initialise les effets
+        List<TagAbstract> tas = TagSetter.getTags(tags);
+
+        for(TagAbstract ta : tas){
+            switch(ta.getType()){
+                case AlignLegacy -> { apply((AlignmentLegacy)ta); }
+                case AlignNumpad -> { apply((AlignmentNumpad)ta); }
+                case AlphaGeneral -> { apply((AlphaGeneral)ta); }
+                case AlphaText -> { apply((AlphaOfText)ta); }
+                case AlphaKaraoke -> { apply((AlphaOfKaraoke)ta); }
+                case AlphaOutline -> { apply((AlphaOfOutline)ta); }
+                case AlphaShadow -> { apply((AlphaOfShadow)ta); }
+                case ColorTextLegacy -> { apply((ColorOfTextLegacy)ta); }
+                case ColorText -> { apply((ColorOfText)ta); }
+                case ColorKaraoke -> { apply((ColorOfKaraoke)ta); }
+                case ColorOutline -> { apply((ColorOfOutline)ta); }
+                case ColorShadow -> { apply((ColorOfShadow)ta); }
+                case Blur -> { apply((Blur)ta); }
+                case BlurEdge -> { apply((BlurEdge)ta); }
+                case FontName -> { apply((FontName)ta); }
+                case FontSize -> { apply((FontSize)ta); }
+                case FontRot -> { apply((FontRotate)ta); }
+                case FontRotX -> { apply((FontRotateX)ta); }
+                case FontRotY -> { apply((FontRotateY)ta); }
+                case FontRotZ -> { apply((FontRotateZ)ta); }
+                case FontScale -> { apply((FontScale)ta); }
+                case FontScaleX -> { apply((FontScaleX)ta); }
+                case FontScaleY -> { apply((FontScaleY)ta); }
+                case FontSpacing -> { apply((FontSpacing)ta); }
+                case FontEncoding -> { apply((FontEncoding)ta); }
+                case ShearX -> { apply((ShearX)ta); }
+                case ShearY -> { apply((ShearY)ta); }
+                case Bold -> { apply((Bold)ta); }
+                case Italic -> { apply((Italic)ta); }
+                case Underline -> { apply((Underline)ta); }
+                case StrikeOut -> { apply((Strikeout)ta); }
+                case BordLegacy -> { apply((BordLegacy)ta); }
+                case BordX -> { apply((BordX)ta); }
+                case BordY -> { apply((BordY)ta); }
+                case ShadLegacy -> { apply((ShadLegacy)ta); }
+                case ShadX -> { apply((ShadX)ta); }
+                case ShadY -> { apply((ShadY)ta); }
+                case WrapStyle -> { apply((WrapStyle)ta); }
+                case Reset -> { apply((Reset)ta); }
+                case Position -> { apply((Position)ta); }
+                case Movement -> { apply((Movement)ta); }
+                case Origin -> { apply((Origin)ta); }
+                case ClipRect -> { apply((ClipRectangle)ta); }
+                case ClipDrawing -> { apply((ClipDrawing)ta); }
+                case IClipRect -> { apply((ClipRectangleInvisibility)ta); }
+                case IClipDrawing -> { apply((ClipDrawingInvisibility)ta); }
+                case KaraokeNormal -> { apply((KaraokeNormal)ta); }
+                case KaraokeFillLegacy -> { apply((KaraokeFillLegacy)ta); }
+                case KaraokeFill -> { apply((KaraokeFill)ta); }
+                case KaraokeOutline -> { apply((KaraokeOutline)ta); }
+                case FadingNormal -> { apply((FadingNormal)ta); }
+                case FadingComplex -> { apply((FadingComplex)ta); }
+                case Drawing -> { apply((Drawing)ta); }
+                case DrawingBaselineOffset -> { apply((DrawingBaselineOffset)ta); }
+                case Animation -> { apply((Animation)ta); }
             }
         }
         
-        // TODO prendre en charge les couches
+        // On va d'abord étudier la forme avec l'API Java
         
-        return images;
-    }
-    
-    private List<BufferedImage> doFromASS(AssEvent evt, long nanos){
-        TagLettersWith tlw = TagLettersWith.create(evt);
+        BufferedImage img = new BufferedImage(10, 10, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = img.createGraphics();
+        g2d.setFont(font);
         
-        for(TagLetter tl : tlw.getListWords()){
+        TextLayout textLayout = new TextLayout(Character.toString(character), font, g2d.getFontRenderContext());
+        
+        // On obtient une forme avec l'API Java
+        AffineTransform tr = new AffineTransform();
+//        tr.scale((double)fontScale[0], (double)fontScale[1]); // fscx, fscy
+        Shape sh = textLayout.getOutline(tr);
+        
+        // On décompose la forme avec l'API Java pour faire la forme avec l'API JavaFx
+        PathIterator pi = sh.getPathIterator(null);
+        // Un objet où seront stockés les points parsés
+        double[] pts = new double[6];
+        // Un objet qui récupère les valeurs du dernier MOVE pour fermer si besoin avec CLOSE
+        double[] lastMove = new double[2];
+        
+        while(pi.isDone() == false){
+            int type = pi.currentSegment(pts);
             
-            // On obtient les tags dans le style
-            if(tl.getTags().isEmpty()){
-                tl.getTags().addAll(evt.getStyle().getTagsFromStyle());
-            }else{
-                tl.getTags().addAll(0, evt.getStyle().getTagsFromStyle());
-            }            
-            
-            // On obtient les tags dans la phrase
-            List<TagAbstract> tas = TagSetter.getTags(tl);
-        
-            for(TagAbstract ta : tas){
-                switch(ta.getType()){
-                    case AlignLegacy -> { apply((AlignmentLegacy)ta); }
-                    case AlignNumpad -> { apply((AlignmentNumpad)ta); }
-                    case AlphaGeneral -> { apply((AlphaGeneral)ta); }
-                    case AlphaText -> { apply((AlphaOfText)ta); }
-                    case AlphaKaraoke -> { apply((AlphaOfKaraoke)ta); }
-                    case AlphaOutline -> { apply((AlphaOfOutline)ta); }
-                    case AlphaShadow -> { apply((AlphaOfShadow)ta); }
-                    case ColorTextLegacy -> { apply((ColorOfTextLegacy)ta); }
-                    case ColorText -> { apply((ColorOfText)ta); }
-                    case ColorKaraoke -> { apply((ColorOfKaraoke)ta); }
-                    case ColorOutline -> { apply((ColorOfOutline)ta); }
-                    case ColorShadow -> { apply((ColorOfShadow)ta); }
-                    case Blur -> { apply((Blur)ta); }
-                    case BlurEdge -> { apply((BlurEdge)ta); }
-                    case FontName -> { apply((FontName)ta); }
-                    case FontSize -> { apply((FontSize)ta); }
-                    case FontRot -> { apply((FontRotate)ta); }
-                    case FontRotX -> { apply((FontRotateX)ta); }
-                    case FontRotY -> { apply((FontRotateY)ta); }
-                    case FontRotZ -> { apply((FontRotateZ)ta); }
-                    case FontScale -> { apply((FontScale)ta); }
-                    case FontScaleX -> { apply((FontScaleX)ta); }
-                    case FontScaleY -> { apply((FontScaleY)ta); }
-                    case FontSpacing -> { apply((FontSpacing)ta); }
-                    case FontEncoding -> { apply((FontEncoding)ta); }
-                    case ShearX -> { apply((ShearX)ta); }
-                    case ShearY -> { apply((ShearY)ta); }
-                    case Bold -> { apply((Bold)ta); }
-                    case Italic -> { apply((Italic)ta); }
-                    case Underline -> { apply((Underline)ta); }
-                    case StrikeOut -> { apply((Strikeout)ta); }
-                    case BordLegacy -> { apply((BordLegacy)ta); }
-                    case BordX -> { apply((BordX)ta); }
-                    case BordY -> { apply((BordY)ta); }
-                    case ShadLegacy -> { apply((ShadLegacy)ta); }
-                    case ShadX -> { apply((ShadX)ta); }
-                    case ShadY -> { apply((ShadY)ta); }
-                    case WrapStyle -> { apply((WrapStyle)ta); }
-                    case Reset -> { apply((Reset)ta); }
-                    case Position -> { apply((Position)ta); }
-                    case Movement -> { apply((Movement)ta); }
-                    case Origin -> { apply((Origin)ta); }
-                    case ClipRect -> { apply((ClipRectangle)ta); }
-                    case ClipDrawing -> { apply((ClipDrawing)ta); }
-                    case IClipRect -> { apply((ClipRectangleInvisibility)ta); }
-                    case IClipDrawing -> { apply((ClipDrawingInvisibility)ta); }
-                    case KaraokeNormal -> { apply((KaraokeNormal)ta); }
-                    case KaraokeFillLegacy -> { apply((KaraokeFillLegacy)ta); }
-                    case KaraokeFill -> { apply((KaraokeFill)ta); }
-                    case KaraokeOutline -> { apply((KaraokeOutline)ta); }
-                    case FadingNormal -> { apply((FadingNormal)ta); }
-                    case FadingComplex -> { apply((FadingComplex)ta); }
-                    case Drawing -> { apply((Drawing)ta); }
-                    case DrawingBaselineOffset -> { apply((DrawingBaselineOffset)ta); }
-                    case Animation -> { apply((Animation)ta); }
+            switch(type){
+                case PathIterator.SEG_MOVETO -> {
+                    p.getElements().add(new MoveTo(pts[0], pts[1]));
+                    lastMove[0] = pts[0]; lastMove[1] = pts[1];
+                }
+                case PathIterator.SEG_LINETO -> {
+                    p.getElements().add(new LineTo(pts[0], pts[1]));
+                }
+                case PathIterator.SEG_QUADTO -> {
+                    p.getElements().add(new QuadCurveTo(pts[0], pts[1], pts[2], pts[3]));
+                }
+                case PathIterator.SEG_CUBICTO -> {
+                    p.getElements().add(new CubicCurveTo(pts[0], pts[1], pts[2], pts[3], pts[4], pts[5]));
+                }
+                case PathIterator.SEG_CLOSE -> {
+                    p.getElements().add(new LineTo(lastMove[0], lastMove[1]));
                 }
             }
+            
+            pi.next();
         }
         
-        return igen.render(this, nanos);
+        // On libère les ressources utilisées pour le contexte graphique
+        // et on retourne le chemin en JavaFx
+        g2d.dispose();
+        
+        return p;
     }
+
+    public Path getPath() {
+        return path;
+    }
+
+    public char getCharacter() {
+        return character;
+    }
+
+    public String getTags() {
+        return tags;
+    }
+    
+    //--------------------------------------------------------------------------
     
     public void apply(AlignmentLegacy a){
         switch(a.getData()){
@@ -652,11 +685,11 @@ public class TagParameters {
         this.wrapStyle = wrapStyle;
     }
 
-    public AssStyle getReset() {
+    public String getReset() {
         return reset;
     }
 
-    public void setReset(AssStyle reset) {
+    public void setReset(String reset) {
         this.reset = reset;
     }
 
@@ -699,11 +732,7 @@ public class TagParameters {
     public void setDrawingOffset(int drawingOffset) {
         this.drawingOffset = drawingOffset;
     }
-
-    public ASS getAss() {
-        return ass;
-    }
-
+    
     public float[] getFontRotate() {
         return fontRotate;
     }
@@ -722,6 +751,24 @@ public class TagParameters {
 
     public double[] getOrigin() {
         return origin;
+    }
+    
+    //==========================================================================
+    
+    public double getStrWitdh() {
+        return strWitdh;
+    }
+
+    public void setStrWitdh(double strWitdh) {
+        this.strWitdh = strWitdh;
+    }
+
+    public boolean isSpace() {
+        return space;
+    }
+
+    public double getSpaceWidth() {
+        return spaceWidth;
     }
     
 }

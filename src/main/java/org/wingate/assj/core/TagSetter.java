@@ -41,13 +41,11 @@ public class TagSetter {
     
     public TagSetter() {
     }
-    
-    public static List<TagAbstract> getTags(String s){
-        return getTags(new TagLetter("", Arrays.asList(s.split("\\\\"))));
-    }
-    
-    public static List<TagAbstract> getTags(TagLetter tl){
-        List<TagAbstract> tas = new ArrayList<>();        
+        
+    public static List<TagAbstract> getTags(String strTags){
+        List<TagAbstract> tas = new ArrayList<>();
+        
+        List<String> tags = Arrays.asList(strTags.split("\\\\"));
         
         Pattern p;
         Matcher m;
@@ -57,7 +55,7 @@ public class TagSetter {
         for(TagAbstract<?> ta : TagCollection.getTags()){
             p = Pattern.compile(ta.getTag());
             
-            for (String z : tl.getTags()) {
+            for (String z : tags) {
                 m = p.matcher("\\" + z);
             
                 while(m.find()){

@@ -947,4 +947,14 @@ public class AssStyle {
             
         return tags;
     }
+    
+    public String getTagsFromStyleToString(){
+        String tags = "";
+        
+        for(String s : getTagsFromStyle()){
+            tags += s;
+        }
+        
+        return tags;
+    }
 }

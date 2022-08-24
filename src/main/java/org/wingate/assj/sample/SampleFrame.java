@@ -28,7 +28,7 @@ import org.wingate.assj.ASS;
 import org.wingate.assj.AssEvent;
 import org.wingate.assj.AssStyle;
 import org.wingate.assj.AssTime;
-import org.wingate.assj.core.TagParameters;
+import org.wingate.assj.core.Render;
 
 /**
  *
@@ -76,13 +76,14 @@ public class SampleFrame extends javax.swing.JFrame implements Runnable {
     
     public void refreshDrawing(long nanos){
         Platform.runLater(() -> {
-            TagParameters params = new TagParameters(createJunkAss(tfText.getText(),
-                    (long)spinnerFrom.getValue(), (long)spinnerTo.getValue()));
+            Render render = new Render();
 
             long nanosStart = TimeUnit.MILLISECONDS.toNanos((long)spinnerFrom.getValue());
             long nanosEnd = TimeUnit.MILLISECONDS.toNanos((long)spinnerTo.getValue());
-
-            List<BufferedImage> images = params.getImages(nanos, nanosStart, nanosEnd);
+            
+            ASS ass = createJunkAss(tfText.getText(),
+                    (long)spinnerFrom.getValue(), (long)spinnerTo.getValue());
+            List<BufferedImage> images = render.getImages(ass, nanos, nanosStart, nanosEnd);
 
             view.updateView(images);
         });        

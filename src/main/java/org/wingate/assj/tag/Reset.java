@@ -13,7 +13,7 @@ import org.wingate.assj.AssStyle;
  *
  * @author util2
  */
-public class Reset extends TagAbstract<AssStyle> {
+public class Reset extends TagAbstract<String> {
     
     public Reset() {
         init();
@@ -23,6 +23,6 @@ public class Reset extends TagAbstract<AssStyle> {
         name = "r";
         tag = "\\\\r(?<param>[^\\\\]?)";
         type = TagEnum.Reset;
-        data = new AssStyle();
+        data = new AssStyle().getName();
     }
 }
