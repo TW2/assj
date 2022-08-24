@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Scanner;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
@@ -26,9 +25,9 @@ public class Assj {
         switch(args.length) {
             case 0 -> {
                 System.out.println("Please use command line like that:");
-                System.out.println("java -jar Assj.jar \"<ass-path>\" \"<nanoseconds>\" ");
+                System.out.println("java -jar Assj.jar \"<ass-path>\" \"<img-path>\" \"<nanoseconds>\" ");
                 System.out.println("Example:");     
-                System.out.println("java -jar Assj.jar \"c:\\users\\GothicLolita\\Darling.ass\" \"19148236200\"");
+                System.out.println("java -jar Assj.jar \"c:\\users\\GothicLolita\\Darling.ass\" \"Darling.png\" \"19148236200\"");
                 String cmd;
                 try (Scanner sc = new Scanner(System.in)) {
                     System.out.println("Type 'demo' to launch the demo or 'quit' to stop. And press Enter.");
@@ -45,15 +44,17 @@ public class Assj {
                     System.exit(0);
                 }
             }
-            case 2 -> {
-                long before = System.currentTimeMillis();
+            case 3 -> {
                 try{
+                    long before = System.currentTimeMillis();
+                    
                     ASS ass = ASS.Read(args[0]);
-                    long nanos = Long.parseLong(args[1]);
+                    File output = new File(args[1]);
+                    long nanos = Long.parseLong(args[2]);
                     
                     // Initialize JavaFX
                     JFXPanel fxPanel = new JFXPanel();
-                    
+
                     // Get images
                     Platform.runLater(() -> {
                         Render r = new Render();
@@ -64,29 +65,32 @@ public class Assj {
                                 images.get(0).getHeight(),
                                 BufferedImage.TYPE_INT_ARGB
                         );
-                        
+
                         Graphics2D g2d = blended.createGraphics();
-                        
+
                         for(BufferedImage img : images){
                             g2d.drawImage(img, 0, 0, null);
                         }
-                        
+
                         g2d.dispose();
-                        
+
                         try {
-                            ImageIO.write(blended, "png", new File("img" + nanos + ".png"));
+                            ImageIO.write(blended, "png", output);
                         } catch (IOException ex) {
                             Logger.getLogger(Assj.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     });
+
+                    long elapsed = System.currentTimeMillis() - before;
+                    System.out.println(String.format(
+                            "Time elapsed: %fs",
+                            AssTime.getLengthInSeconds(AssTime.create(elapsed))
+                    ));
+
+                    Platform.exit();
                 }catch(NumberFormatException ex){
                     Logger.getLogger(Assj.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                long elapsed = System.currentTimeMillis() - before;
-                System.out.println(String.format(
-                        "Time elapsed: %fms",
-                        AssTime.getLengthInSeconds(AssTime.create(elapsed))
-                ));
             }
         }
     }
