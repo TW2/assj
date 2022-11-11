@@ -255,6 +255,9 @@ public class AssEvent {
      */
     public static String getAssEventLine(AssEvent ev){
         if(ev.getStyle() == null) ev.setStyle(AssStyle.getDefault());
+        if(ev.getName() == null) ev.setName("");
+        if(ev.getEffect() == null) ev.setEffect("");
+        if(ev.getText() == null) ev.setText("");
         
         String line = "";
         line += ev.getLineType().toString().concat(": ");

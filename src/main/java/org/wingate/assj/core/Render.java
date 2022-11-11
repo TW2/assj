@@ -107,13 +107,13 @@ public class Render extends JFXPanel {
                 
         Group root = new Group();
 
-        double betweenLetters = 20d;
-        double baseLine = 200d;
-        
         List<FxChar> fxChars = FxCharList.getFxChars(ass, ev, nanos).getFxCharList();
         
         double videoWidth = fxChars.get(0).getVideoWidth();
         double videoHeight = fxChars.get(0).getVideoHeight();
+        
+        double betweenLetters = fxChars.get(0).getPath().getTranslateX();
+        double lineLetters = fxChars.get(0).getPath().getTranslateY();
         
         // We have a preconfigured path for each char (included punctuation)
         for(FxChar fc : fxChars){
@@ -123,7 +123,7 @@ public class Render extends JFXPanel {
             
             // Apply position
             path.setTranslateX(betweenLetters);
-            path.setTranslateY(baseLine);
+            path.setTranslateY(lineLetters);
             
             // Apply underline, strikeout
             
@@ -131,7 +131,7 @@ public class Render extends JFXPanel {
             // Apply Shear fax, fay
             Shear shear = new Shear();
             shear.setPivotX(Double.parseDouble(ass.getResX()));
-            shear.setPivotY(baseLine);
+            shear.setPivotY(fc.getMove()[1]);
             shear.setX(fc.getShear()[0]);
             shear.setY(fc.getShear()[1]);
             path.getTransforms().add(shear);

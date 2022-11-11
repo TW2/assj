@@ -20,8 +20,6 @@ import java.awt.BorderLayout;
 import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import org.wingate.assj.ASS;
@@ -34,13 +32,11 @@ import org.wingate.assj.core.Render;
  *
  * @author util2
  */
-public class SampleFrame extends javax.swing.JFrame implements Runnable {
+public class SampleFrame extends javax.swing.JFrame {
     
     private final View view = new View();
     
-    private Thread thread = null;
-    private volatile boolean running = false;
-    private volatile long nanosTimeNow = 0L;
+    private volatile long nanosTimeNow = 50L;
 
     /**
      * Creates new form SampleFrame
@@ -78,52 +74,14 @@ public class SampleFrame extends javax.swing.JFrame implements Runnable {
         Platform.runLater(() -> {
             Render render = new Render();
 
-            long nanosStart = TimeUnit.MILLISECONDS.toNanos((long)spinnerFrom.getValue());
-            long nanosEnd = TimeUnit.MILLISECONDS.toNanos((long)spinnerTo.getValue());
+            long nanosStart = TimeUnit.MILLISECONDS.toNanos(0L);
+            long nanosEnd = TimeUnit.MILLISECONDS.toNanos(3000L);
             
-            ASS ass = createJunkAss(tfText.getText(),
-                    (long)spinnerFrom.getValue(), (long)spinnerTo.getValue());
+            ASS ass = createJunkAss(tfText.getText(), 0L, 3000L);
             List<BufferedImage> images = render.getImages(ass, nanos, nanosStart, nanosEnd);
 
             view.updateView(images);
         });        
-    }
-    
-    public void play(){
-        if(thread != null && thread.isAlive() && thread.isInterrupted() == false){
-            running = false;
-            thread.interrupt();
-            thread = null;
-        }
-        running = true;
-        thread = new Thread(this);
-        thread.start();
-    }
-    
-    public void pause(){
-        if(thread != null){
-            running = !running;
-        }
-    }
-
-    @Override
-    public void run() {
-        while(true){
-            if(running){
-                try {
-                    refreshDrawing(nanosTimeNow);
-                    TimeUnit.NANOSECONDS.sleep(1);
-                    if(((long)spinnerTo.getValue()) != 0L){
-                        long nanosStart = TimeUnit.MILLISECONDS.toNanos((long)spinnerFrom.getValue());
-                        long nanosEnd = TimeUnit.MILLISECONDS.toNanos((long)spinnerTo.getValue());
-                        nanosTimeNow = nanosTimeNow + 1 > nanosEnd ? nanosStart : nanosTimeNow + 1;
-                    }
-                    
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(SampleFrame.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        }
     }
 
     /**
@@ -137,9 +95,6 @@ public class SampleFrame extends javax.swing.JFrame implements Runnable {
 
         jToolBar1 = new javax.swing.JToolBar();
         btnPlay = new javax.swing.JButton();
-        btnStop = new javax.swing.JButton();
-        spinnerFrom = new javax.swing.JSpinner();
-        spinnerTo = new javax.swing.JSpinner();
         tfText = new javax.swing.JTextField();
         panASS = new javax.swing.JPanel();
 
@@ -147,7 +102,7 @@ public class SampleFrame extends javax.swing.JFrame implements Runnable {
 
         jToolBar1.setRollover(true);
 
-        btnPlay.setText("Play");
+        btnPlay.setText("Test");
         btnPlay.setFocusable(false);
         btnPlay.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         btnPlay.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
@@ -158,39 +113,7 @@ public class SampleFrame extends javax.swing.JFrame implements Runnable {
         });
         jToolBar1.add(btnPlay);
 
-        btnStop.setText("Pause");
-        btnStop.setFocusable(false);
-        btnStop.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnStop.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        btnStop.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnStopActionPerformed(evt);
-            }
-        });
-        jToolBar1.add(btnStop);
-
-        spinnerFrom.setModel(new javax.swing.SpinnerNumberModel(0L, 0L, null, 1L));
-        spinnerFrom.addChangeListener(new javax.swing.event.ChangeListener() {
-            public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                spinnerFromStateChanged(evt);
-            }
-        });
-        jToolBar1.add(spinnerFrom);
-
-        spinnerTo.setModel(new javax.swing.SpinnerNumberModel(3000L, 0L, null, 1L));
-        spinnerTo.addChangeListener(new javax.swing.event.ChangeListener() {
-            public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                spinnerToStateChanged(evt);
-            }
-        });
-        jToolBar1.add(spinnerTo);
-
         tfText.setText("The black cat is in the house of Denise.");
-        tfText.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                tfTextActionPerformed(evt);
-            }
-        });
         jToolBar1.add(tfText);
 
         panASS.setBackground(new java.awt.Color(102, 153, 255));
@@ -226,28 +149,8 @@ public class SampleFrame extends javax.swing.JFrame implements Runnable {
 
     private void btnPlayActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPlayActionPerformed
         // Play
-        play();
+        refreshDrawing(nanosTimeNow);
     }//GEN-LAST:event_btnPlayActionPerformed
-
-    private void btnStopActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStopActionPerformed
-        // Pause
-        pause();
-    }//GEN-LAST:event_btnStopActionPerformed
-
-    private void spinnerFromStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_spinnerFromStateChanged
-        // from
-        running = false;
-    }//GEN-LAST:event_spinnerFromStateChanged
-
-    private void spinnerToStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_spinnerToStateChanged
-        // to
-        running = false;
-    }//GEN-LAST:event_spinnerToStateChanged
-
-    private void tfTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tfTextActionPerformed
-        // text
-        running = false;
-    }//GEN-LAST:event_tfTextActionPerformed
 
     /**
      * @param args the command line arguments
@@ -286,11 +189,8 @@ public class SampleFrame extends javax.swing.JFrame implements Runnable {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnPlay;
-    private javax.swing.JButton btnStop;
     private javax.swing.JToolBar jToolBar1;
     private javax.swing.JPanel panASS;
-    private javax.swing.JSpinner spinnerFrom;
-    private javax.swing.JSpinner spinnerTo;
     private javax.swing.JTextField tfText;
     // End of variables declaration//GEN-END:variables
 }

@@ -242,7 +242,32 @@ public class FxCharList {
         double x = 0d, offsetX = 0d;
         double y = 0d, offsetY = 0d;        
 
-        int align = event.getStyle().getAlignment();
+        int align = event.getStyle().getAlignment();        
+        if(tags.contains("\\an") == true){
+            p = Pattern.compile("\\\\an(\\d+)");
+            m = p.matcher(tags);
+            while(m.find()){
+                align = Integer.parseInt(m.group(1));
+            }
+        }        
+        if(tags.contains("\\a") == true){
+            p = Pattern.compile("\\\\a(\\d+)");
+            m = p.matcher(tags);
+            while(m.find()){
+                switch(Integer.parseInt(m.group(1))){
+                    case 1 -> { align = 1; }
+                    case 2 -> { align = 2; }
+                    case 3 -> { align = 3; }
+                    case 5 -> { align = 7; }
+                    case 6 -> { align = 8; }
+                    case 7 -> { align = 9; }
+                    case 9 -> { align = 4; }
+                    case 10 -> { align = 5; }
+                    case 11 -> { align = 6; }
+                }
+            }
+        }
+        
         if(tags.contains("\\move") == true){
             p = Pattern.compile("\\\\move\\((\\d+.*\\d*),(\\d+.*\\d*),(\\d+.*\\d*),(\\d+.*\\d*),(\\d*.*\\d*),(\\d*.*\\d*)\\)");
             m = p.matcher(tags);
