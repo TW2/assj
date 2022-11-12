@@ -53,6 +53,7 @@ public class SampleFrame extends javax.swing.JFrame {
         ASS ass = ASS.NoFileToLoad();
         
         AssEvent ev = new AssEvent();
+        ev.setLineType(AssEvent.LineType.Dialogue);
         ev.setText(sentence);
         ev.setStartTime(AssTime.create(msStart));
         ev.setEndTime(AssTime.create(msEnd));

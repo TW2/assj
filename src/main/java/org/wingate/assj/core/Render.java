@@ -86,14 +86,15 @@ public class Render extends JFXPanel {
         
         // On traite tous les événements
         for(AssEvent ev : ass.getEvents()){
+            if(ev.getLineType() != AssEvent.LineType.Dialogue ) continue;
             long start = TimeUnit.MILLISECONDS.toNanos(AssTime.toMillisecondsTime(ev.getStartTime()));
             long end = TimeUnit.MILLISECONDS.toNanos(AssTime.toMillisecondsTime(ev.getEndTime()));
             if(startlimit != 0L || stoplimit != 0L){
                 if(startlimit <= nanos && nanos < stoplimit){
-                    images.addAll(render(ass, ev, nanos));
+                    images.add(render(ass, ev, nanos));
                 }
             }else if(start <= nanos && nanos < end){
-                images.addAll(render(ass, ev, nanos));
+                images.add(render(ass, ev, nanos));
             }
         }
         
@@ -102,12 +103,18 @@ public class Render extends JFXPanel {
         return images;
     }
     
-    private List<BufferedImage> render(ASS ass, AssEvent ev, long nanos){
-        List<BufferedImage> images = new ArrayList<>();
+    private BufferedImage render(ASS ass, AssEvent ev, long nanos){
+        BufferedImage img = new BufferedImage(
+                Integer.parseInt(ass.getResX()),
+                Integer.parseInt(ass.getResY()),
+                BufferedImage.TYPE_INT_ARGB
+        );
                 
         Group root = new Group();
 
         List<FxChar> fxChars = FxCharList.getFxChars(ass, ev, nanos).getFxCharList();
+        
+        if(fxChars.isEmpty()) return img;
         
         double videoWidth = fxChars.get(0).getVideoWidth();
         double videoHeight = fxChars.get(0).getVideoHeight();
@@ -164,12 +171,9 @@ public class Render extends JFXPanel {
         setScene(scene);
 
         WritableImage screenshot = scene.snapshot(null);
-        BufferedImage image = SwingFXUtils.fromFXImage(screenshot, null);
-
-        images.add(image);
-
+        img = SwingFXUtils.fromFXImage(screenshot, null);
         
-        return images;
+        return img;
     }
     
     public enum ColorChoice {
