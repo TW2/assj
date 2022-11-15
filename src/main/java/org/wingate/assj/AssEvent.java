@@ -78,6 +78,7 @@ public class AssEvent {
         
     }
     
+    private int UID = -1;
     private LineType lineType = LineType.Comment;
     private int layer = 0;
     private int marginL = 0;
@@ -397,6 +398,14 @@ public class AssEvent {
     @Override
     public String toString() {
         return type;
+    }
+
+    public int getUID() {
+        return UID;
+    }
+
+    public void setUID(int UID) {
+        this.UID = UID;
     }
     
 }
