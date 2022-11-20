@@ -6,7 +6,9 @@ There is no release, cause this library is still in alpha, not optimized and tag
 
 The render returns a list of BufferedImage which are, in this example, blended. Each image is transparent and includes JavaFx Path(s) elements to improve the speed. A Path is a node where we add others node to modify the global render. Each image represents an event at a nanoseconds time.
 
-You can get an output png like this:
+You can get an output png like this.
+
+Example:
 ```java
 public class BasicUsage {
     
@@ -62,7 +64,9 @@ public class BasicUsage {
 }
 ```
 
-Or get a BufferedImage with event by calling 'event.getImage()'
+Or get a BufferedImage with event by calling 'event.getImage()'. This method always send image with transparency. If there is no event a transparency image is sent otherwise a transparency image with some subtitles blended artefacts is sent.
+
+Example:
 ```java
 public class AdvancedUsage {
 
