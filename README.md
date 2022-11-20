@@ -8,43 +8,90 @@ The render returns a list of BufferedImage which are, in this example, blended. 
 
 You can get an output png like this:
 ```java
-try{
-    ASS ass = ASS.Read(args[0]);
-    File output = new File(args[1]);
-    long nanos = Long.parseLong(args[2]);
+public class BasicUsage {
+    
+    public static void main(String[] args) {
+        try{
+            long before = System.currentTimeMillis();
 
-    // Initialize JavaFX
-    JFXPanel fxPanel = new JFXPanel();
+            ASS ass = ASS.Read(args[0]);
+            File output = new File(args[1]);
+            long nanos = Long.parseLong(args[2]);
 
-    // Get images
-    Platform.runLater(() -> {
-        Render r = new Render();
-        List<BufferedImage> images = r.getImages(ass, nanos);
+            // Initialize JavaFX
+            JFXPanel fxPanel = new JFXPanel();
 
-        BufferedImage blended = new BufferedImage(
-                images.get(0).getWidth(),
-                images.get(0).getHeight(),
-                BufferedImage.TYPE_INT_ARGB
-        );
+            // Get images
+            Platform.runLater(() -> {
+                Render r = new Render();
+                List<BufferedImage> images = r.getImages(ass, nanos);
 
-        Graphics2D g2d = blended.createGraphics();
+                BufferedImage blended = new BufferedImage(
+                        images.get(0).getWidth(),
+                        images.get(0).getHeight(),
+                        BufferedImage.TYPE_INT_ARGB
+                );
 
-        for(BufferedImage img : images){
-            g2d.drawImage(img, 0, 0, null);
-        }
+                Graphics2D g2d = blended.createGraphics();
 
-        g2d.dispose();
+                for(BufferedImage img : images){
+                    g2d.drawImage(img, 0, 0, null);
+                }
 
-        try {
-            ImageIO.write(blended, "png", output);
-        } catch (IOException ex) {
+                g2d.dispose();
+
+                try {
+                    ImageIO.write(blended, "png", output);
+                } catch (IOException ex) {
+                    Logger.getLogger(Assj.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            });
+
+            long elapsed = System.currentTimeMillis() - before;
+            System.out.println(String.format(
+                    "Time elapsed: %fs",
+                    AssTime.getLengthInSeconds(AssTime.create(elapsed))
+            ));
+
+            Platform.exit();
+        }catch(NumberFormatException ex){
             Logger.getLogger(Assj.class.getName()).log(Level.SEVERE, null, ex);
         }
-    });
+    }
+    
+}
+```
 
-    Platform.exit();
-}catch(NumberFormatException ex){
-    Logger.getLogger(Assj.class.getName()).log(Level.SEVERE, null, ex);
+Or get a BufferedImage with event by calling 'event.getImage()'
+```java
+public class AdvancedUsage {
+
+    private ASS ass = null;
+    private SubEvent controller = new SubEvent();
+    
+    private long nanosPosition = 0L;
+    
+    public AdvancedUsage() {
+        
+        // Listen
+        controller.addSubsListener(new SubsListener() {
+            @Override
+            public void getImage(SubsImageEvent event) {
+                System.out.println("Do what you want with image!");
+            }
+        });
+        
+        // Update with 
+        new Timer(50, e -> {
+            if (ass != null) {
+                //From timer -> millis
+                //Required -> nanos
+                nanosPosition += TimeUnit.MILLISECONDS.toNanos(50L);
+                controller.createFX(ass, nanosPosition);
+            }
+        }).start();
+    }
+    
 }
 ```
 
