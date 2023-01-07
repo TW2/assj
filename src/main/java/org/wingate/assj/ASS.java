@@ -43,6 +43,7 @@ public class ASS {
     private List<AssEvent> events = new ArrayList<>();
     private Map<String, AssStyle> styles = new HashMap<>();
     private List<String> names = new ArrayList<>();
+    private List<AssPaths> svgPaths = new ArrayList<>();
     
     private List<File> attachedFonts = new ArrayList<>();
     private List<File> attachedGraphics = new ArrayList<>();
@@ -83,6 +84,7 @@ public class ASS {
         events.clear();
         styles.clear();
         names.clear();
+        svgPaths.clear();
     }
     
     public static ASS NoFileToLoad(){
@@ -130,6 +132,11 @@ public class ASS {
                 if(line.startsWith("Video Zoom Percent")){ ass.aegisVideoZoomPercent = line.substring("Video Zoom Percent: ".length()); }
                 if(line.startsWith("Active Line")){ ass.aegisActiveLine = line.substring("Active Line: ".length()); }
                 if(line.startsWith("Video Position")){ ass.aegisVideoPosition = line.substring("Video Position: ".length()); }
+                //[Yggdrasil Section]
+                if(line.startsWith("; DrawSVG: ")){
+                    AssPaths ps = new AssPaths(line.substring("; DrawSVG: ".length()));
+                    ass.svgPaths.add(ps);
+                }
                 //[V4+ Styles]
                 if(line.startsWith("Style") & ass.scriptType.equalsIgnoreCase("v4.00")){
                     // SSA
@@ -219,6 +226,12 @@ public class ASS {
 //            pw.println("Active Line: " + aegisActiveLine);
 //            pw.println("Video Position: " + aegisVideoPosition);
 //            pw.println("");
+            //[Yggdrasil Section]
+            pw.println("[Yggdrasil Section]");
+            for(AssPaths ps : ass.svgPaths){
+                pw.println(ps.getSection() + ps.getSvgPath());
+            }
+            pw.println("");
             //[V4+ Styles]
             pw.println("[V4+ Styles]");
             pw.println("Format: Name, Fontname, Fontsize, "
@@ -283,7 +296,13 @@ public class ASS {
         sb.append("Video Zoom Percent: ").append(ass.aegisVideoZoomPercent).append("\n");
         sb.append("Active Line: ").append(ass.aegisActiveLine).append("\n");
         sb.append("Video Position: ").append(ass.aegisVideoPosition).append("\n");
-        sb.append("").append("\n");
+        sb.append("").append("\n");        
+        //[Yggdrasil Section]
+        sb.append("[Yggdrasil Section]").append("\n");
+        for(AssPaths ps : ass.svgPaths){
+            sb.append(ps.getSection()).append(ps.getSvgPath()).append("\n");
+        }
+        sb.append("\n");
         //[V4+ Styles]
         sb.append("[V4+ Styles]").append("\n");
         sb.append("Format: Name, Fontname, Fontsize, "
@@ -511,6 +530,14 @@ public class ASS {
 
     public List<String> getNames() {
         return names;
+    }
+
+    public List<AssPaths> getSvgPaths() {
+        return svgPaths;
+    }
+
+    public void setSvgPaths(List<AssPaths> svgPaths) {
+        this.svgPaths = svgPaths;
     }
 
     public void setAssFile(File file) {

@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.wingate</groupId>
     <artifactId>assj</artifactId>
-    <version>SNAPSHOT</version>
+    <version>1.1</version>
     <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -17,7 +17,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.3.0</version>
+                <version>3.4.1</version>
                 <executions>
                     <!--  Attach the shade into the package phase  -->
                     <execution>
@@ -31,6 +31,8 @@
                                     <mainClass>org.wingate.assj.Assj</mainClass>
                                 </transformer>
                             </transformers>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <shadedClassifierName>Assj</shadedClassifierName>
                         </configuration>
                     </execution>
                 </executions>
