@@ -454,8 +454,8 @@ public class AssTime {
     }
     
     /**
-     * Get Time in ASS format.
-     * @return A formatted time as "0:00:00.00"
+     * Get Time in SRT format.
+     * @return A formatted time as "0:00:00,000"
      */
     public String toSRTTime(){
         String Smin, Ssec, ms;
