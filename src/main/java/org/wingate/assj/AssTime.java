@@ -458,19 +458,23 @@ public class AssTime {
      * @return A formatted time as "0:00:00,000"
      */
     public String toSRTTime(){
-        String Smin, Ssec, ms;
+        String h, m, s, ms;
 
         int hour = getHours();
         int min = getMinutes();
         int sec = getSeconds();
         int mSec = getMilliseconds();
 
-        if (min<10){Smin = "0"+min;}else{Smin = String.valueOf(min);}
-        if (sec<10){Ssec = "0"+sec;}else{Ssec = String.valueOf(sec);}
-        if (mSec<10){ms = "0"+mSec;}else{ms = String.valueOf(mSec);}
-        if (mSec<100 && mSec>10){ms = "0"+ms;}else{ms = String.valueOf(mSec);}
+        // Hours 01 or 21 (2 digits)
+        h = hour < 10 ? "0" + hour : Integer.toString(hour);
+        // Minutes 01 or 21 (2 digits)
+        m = min < 10 ? "0" + min : Integer.toString(min);
+        // Seconds 01 or 21 (2 digits)
+        s = sec < 10 ? "0" + sec : Integer.toString(sec);        
+        // Milliseconds 001 or 021 or 721 (3 digits)
+        ms = mSec < 10 ? "00" + mSec : (mSec < 100 ? "0" + mSec : Integer.toString(mSec));
 
-        return hour + ":" + Smin + ":" + Ssec + "," + ms;
+        return h + ":" + m + ":" + s + "," + ms;
     }
     
     public static int getFrame(AssTime t, double fps){
