@@ -78,7 +78,9 @@ public class AssEvent {
         
     }
     
+    private ASS ass = null;
     private int UID = -1;
+    private int eventIndex = -1;
     private LineType lineType = LineType.Comment;
     private int layer = 0;
     private int marginL = 0;
@@ -273,6 +275,22 @@ public class AssEvent {
         line += ev.getEffect().concat(",");
         line += ev.getText();
         return line;
+    }
+
+    public ASS getAss() {
+        return ass;
+    }
+
+    public void setAss(ASS ass) {
+        this.ass = ass;
+    }
+
+    public int getEventIndex() {
+        return eventIndex;
+    }
+
+    public void setEventIndex(int eventIndex) {
+        this.eventIndex = eventIndex;
     }
 
     public void setLineType(LineType lineType) {

@@ -29,6 +29,7 @@ import javafx.scene.SceneAntialiasing;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Path;
+import javafx.scene.shape.StrokeType;
 import javafx.scene.transform.Shear;
 import org.wingate.assj.ASS;
 import org.wingate.assj.AssEvent;
@@ -143,18 +144,20 @@ public class Render extends JFXPanel {
             shear.setY(fc.getShear()[1]);
             path.getTransforms().add(shear);
             
-            // Couleur de la forme
+            // Couleur de la forme et transparence
             // Apply Shadow color
-            path.setFill(applyColor(ev, ColorChoice.Shadow));
+            path.setFill(applyColor(ev, fc, ColorChoice.Shadow));
             
             // Apply Outline color
-            path.setStroke(applyColor(ev, ColorChoice.Outline));
+            path.setStrokeType(StrokeType.OUTSIDE);
+            path.setStrokeWidth(videoHeight / 576d * fc.getBord()[1]); // 384x288
+            path.setStroke(applyColor(ev, fc, ColorChoice.Outline));
             
             // Apply Karaoke color
-            path.setFill(applyColor(ev, ColorChoice.Karaoke));
+            path.setFill(applyColor(ev, fc, ColorChoice.Karaoke));
             
             // Apply Text color
-            path.setFill(applyColor(ev, ColorChoice.Text));
+            path.setFill(applyColor(ev, fc, ColorChoice.Text));
             
             root.getChildren().add(path);
 
@@ -180,13 +183,33 @@ public class Render extends JFXPanel {
         Text, Karaoke, Outline, Shadow;
     }
     
-    private Color applyColor(AssEvent ev, ColorChoice choice){
+    private java.awt.Color mixColorAndAlpha(java.awt.Color c, int alpha){
+        return new java.awt.Color(c.getRed(), c.getGreen(), c.getBlue(), alpha);
+    }
+    
+    private Color applyColor(AssEvent ev, FxChar fc, ColorChoice choice){
         java.awt.Color c = java.awt.Color.WHITE;
         switch(choice){
-            case Text -> { c = ev.getStyle().getTextColor(); }
-            case Karaoke -> { c = ev.getStyle().getKaraokeColor(); }
-            case Outline -> { c = ev.getStyle().getBordColor(); }
-            case Shadow -> { c = ev.getStyle().getShadColor(); }
+            case Text -> {
+                c = mixColorAndAlpha(ev.getStyle().getTextColor(), ev.getStyle().getTextAlphaStr());
+                try{ c = mixColorAndAlpha(fc.getTextColor(), Math.round(fc.getTextAlpha() * 255f)); }
+                catch(Exception exc){ }
+            }
+            case Karaoke -> {
+                c = mixColorAndAlpha(ev.getStyle().getKaraokeColor(), ev.getStyle().getKaraokeAlphaStr());
+                try{ c = mixColorAndAlpha(fc.getKaraColor(), Math.round(fc.getKaraAlpha() * 255f)); }
+                catch(Exception exc){ }
+            }
+            case Outline -> {
+                c = mixColorAndAlpha(ev.getStyle().getBordColor(), ev.getStyle().getBordAlphaStr());
+                try{ c = mixColorAndAlpha(fc.getBordColor(), Math.round(fc.getBordAlpha() * 255f)); }
+                catch(Exception exc){ }
+            }
+            case Shadow -> {
+                c = mixColorAndAlpha(ev.getStyle().getShadColor(), ev.getStyle().getShadAlphaStr());
+                try{ c = mixColorAndAlpha(fc.getShadColor(), Math.round(fc.getShadAlpha() * 255f)); }
+                catch(Exception exc){ }
+            }
         }
         
         double r = (double)c.getRed() / 255d;

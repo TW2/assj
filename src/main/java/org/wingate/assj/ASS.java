@@ -100,6 +100,7 @@ public class ASS {
         ass.assFile = new File(path);
         ass.clearData();
         String inFile = "", dataname = ""; // For attachs
+        int eventIndex = 0;
         // Read file by line
         try(FileInputStream fis = new FileInputStream(path); 
                 InputStreamReader isr = new InputStreamReader(fis, AssCommon.detectCharset(path)); 
@@ -150,14 +151,22 @@ public class ASS {
                 //[Events]
                 if(line.toLowerCase().contains("marked=")){
                     // SSA
-                    ass.events.add(AssEvent.createFromSSA(line, ass.styles));
+                    AssEvent ev = AssEvent.createFromSSA(line, ass.styles);
+                    ev.setEventIndex(eventIndex + 1);
+                    ev.setAss(ass);
+                    ass.events.add(ev);
                     String[] array = line.split(",", 9);
                     if(array[4].isEmpty() == false){ ass.names.add(array[4]); }
+                    eventIndex++;
                 }else if(line.startsWith("Comment") | line.startsWith("Dialogue") | line.startsWith("#Proposal") | line.startsWith("#Request")){
                     // ASS
-                    ass.events.add(AssEvent.createFromASS(line, ass.styles));
+                    AssEvent ev = AssEvent.createFromASS(line, ass.styles);
+                    ev.setEventIndex(eventIndex + 1);
+                    ev.setAss(ass);
+                    ass.events.add(ev);
                     String[] array = line.split(",", 9);
                     if(array[4].isEmpty() == false){ ass.names.add(array[4]); }
+                    eventIndex++;
                 }
 //                //[Fonts]
 //                if(line.startsWith("fontname")){
